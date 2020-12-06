@@ -205,6 +205,11 @@ public class Configuration implements Cloneable {
 
         // TODO
         // start piece thread and update {@link Configuration#pieceThreadMap} here
+        if (piece.getPlayer() instanceof ComputerPlayer) {
+            Thread pieceThread = new Thread(piece);
+            this.pieceThreadMap.put(piece, pieceThread);
+            pieceThread.start();
+        }
     }
 
     public void addInitialPiece(Piece piece, int x, int y) {
