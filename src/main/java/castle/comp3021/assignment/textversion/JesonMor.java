@@ -246,6 +246,14 @@ public class JesonMor extends Game {
     @Override
     public void showHistoryMove() {
         //TODO
+        if (this.moveRecords.isEmpty()) {
+            System.out.println("No move history.");
+            return;
+        }
+        System.out.println("\nGame History:");
+        for (MoveRecord moveRecord : this.moveRecords) {
+            System.out.println(moveRecord.toString());
+        }
     }
 
     @Override
