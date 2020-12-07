@@ -40,6 +40,23 @@ public class PausePieceAction extends Action {
     @Override
     public void perform() throws ActionException {
         //TODO
+        if (this.args.length <= 0) {
+            throw new ActionException("No piece to pause");
+        }
+        Place place = ConsolePlayer.parsePlace(this.args[0]);
+        if (place == null) {
+            throw new ActionException("Invalid place " + this.args[0]);
+        }
+        Piece piece = this.game.getPiece(place);
+        if (piece == null) {
+            throw new ActionException("No piece exists at " + place.toString());
+        }
+        if (!(piece.getPlayer() instanceof ComputerPlayer)) {
+            throw new ActionException("Piece at " + place.toString() + " does not belong to computer player");
+        }
+        Thread pieceThread = this.game.getConfiguration().getPieceThread(piece);
+        piece.pause();
+        pieceThread.interrupt();
     }
 
     @Override
