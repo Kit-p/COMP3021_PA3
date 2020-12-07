@@ -1,6 +1,5 @@
 package castle.comp3021.assignment.action;
 
-import castle.comp3021.assignment.player.ComputerPlayer;
 import castle.comp3021.assignment.protocol.Action;
 import castle.comp3021.assignment.protocol.Game;
 import castle.comp3021.assignment.protocol.exception.ActionException;
@@ -30,6 +29,11 @@ public class UndoAction extends Action {
     @Override
     public void perform() throws ActionException {
         //TODO
+        try {
+            this.game.undo();
+        } catch (UndoException e) {
+            throw new ActionException(e.getMessage());
+        }
     }
 
     @Override
