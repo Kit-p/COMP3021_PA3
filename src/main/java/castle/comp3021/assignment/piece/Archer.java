@@ -5,6 +5,7 @@ import castle.comp3021.assignment.protocol.*;
 import java.util.ArrayList;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -86,7 +87,16 @@ public class Archer extends Piece {
     @Override
     public Move getCandidateMove(Game game, Place source) {
         //TODO
-        return null;
+        try {
+            this.calculateMoveParametersQueue.put(new Object[]{game, source});
+            Move move = this.candidateMoveQueue.poll(1, TimeUnit.SECONDS);
+            if (move instanceof InvalidMove) {
+                return null;
+            }
+            return move;
+        } catch (InterruptedException e) {
+            return null;
+        }
     }
 
     private boolean validateMove(Game game, Move move) {
