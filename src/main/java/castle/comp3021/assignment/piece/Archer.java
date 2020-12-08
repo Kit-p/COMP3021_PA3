@@ -140,6 +140,7 @@ public class Archer extends Piece {
     @Override
     public void pause() {
         //TODO
+        this.running.set(false);
     }
 
     /**
