@@ -148,6 +148,7 @@ public class Knight extends Piece {
     @Override
     public void pause() {
         //TODO
+        this.running.set(false);
     }
 
     /**
