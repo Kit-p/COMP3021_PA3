@@ -55,7 +55,7 @@ public class MakeMoveByBehavior {
         List<Move> moves = new ArrayList<>(Arrays.asList(availableMoves));
         return moves.stream()
                 .filter(this::isGreedyMove)
-                .min(Comparator.comparing(move -> getManhattanDistance(move.getDestination(), game.getCentralPlace())))
+                .min(Comparator.comparingInt(move -> getManhattanDistance(move.getDestination(), game.getCentralPlace())))
                 .orElseGet(this::getRandomMove);
     }
 

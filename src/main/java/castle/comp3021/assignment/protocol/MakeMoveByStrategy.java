@@ -56,7 +56,7 @@ public class MakeMoveByStrategy {
         List<Move> moves = new ArrayList<>(Arrays.asList(availableMoves));
         return moves.stream()
                 .filter(this::isWinningMove)
-                .min(Comparator.comparing(move -> getManhattanDistance(move.getSource(), move.getDestination())))
+                .min(Comparator.comparingInt(move -> getManhattanDistance(move.getSource(), move.getDestination())))
                 .orElse(null);
     }
 
@@ -74,12 +74,12 @@ public class MakeMoveByStrategy {
                 .collect(Collectors.toList());
         Move greedyMove = moves.stream()
                 .filter(this::isSmartGreedyMove)
-                .min(Comparator.comparing(move -> getManhattanDistance(move.getDestination(), game.getCentralPlace())))
+                .min(Comparator.comparingInt(move -> getManhattanDistance(move.getDestination(), game.getCentralPlace())))
                 .orElse(null);
         if (greedyMove == null) {
             greedyMove = moves.stream()
                     .filter(this::isGreedyMove)
-                    .min(Comparator.comparing(move -> getManhattanDistance(move.getDestination(), game.getCentralPlace())))
+                    .min(Comparator.comparingInt(move -> getManhattanDistance(move.getDestination(), game.getCentralPlace())))
                     .orElse(null);
         }
         return greedyMove;
@@ -96,7 +96,7 @@ public class MakeMoveByStrategy {
                     .collect(Collectors.toList());
         } else {
             return capturingMoves.stream()
-                    .min(Comparator.comparing(move -> getManhattanDistance(move.getDestination(), game.getCentralPlace())))
+                    .min(Comparator.comparingInt(move -> getManhattanDistance(move.getDestination(), game.getCentralPlace())))
                     .orElse(null);
         }
         if (capturingMoves.size() <= 0) {
@@ -109,7 +109,7 @@ public class MakeMoveByStrategy {
         List<Move> moves = new ArrayList<>(Arrays.asList(availableMoves));
         return moves.stream()
                 .filter(this::isBlockingMove)
-                .min(Comparator.comparing(move -> getManhattanDistance(move.getDestination(), game.getCentralPlace())))
+                .min(Comparator.comparingInt(move -> getManhattanDistance(move.getDestination(), game.getCentralPlace())))
                 .orElse(null);
     }
 
