@@ -93,6 +93,8 @@ public class Knight extends Piece {
     public synchronized Move getCandidateMove(Game game, Place source) {
         //TODO
         try {
+            this.calculateMoveParametersQueue.clear();
+            this.candidateMoveQueue.clear();
             this.calculateMoveParametersQueue.put(new Object[]{game, source});
             Move move = this.candidateMoveQueue.poll(1, TimeUnit.SECONDS);
             if (move instanceof InvalidMove) {
@@ -148,7 +150,9 @@ public class Knight extends Piece {
     @Override
     public void pause() {
         //TODO
-        this.running.set(false);
+        synchronized (this.running) {
+            this.running.set(false);
+        }
     }
 
     /**
@@ -160,8 +164,8 @@ public class Knight extends Piece {
     @Override
     public void resume() {
         //TODO
-        this.running.set(true);
         synchronized (this.running) {
+            this.running.set(true);
             this.running.notifyAll();
         }
     }
@@ -175,7 +179,9 @@ public class Knight extends Piece {
     @Override
     public void terminate() {
         //TODO
-        this.stopped.set(true);
+        synchronized (this.stopped) {
+            this.stopped.set(true);
+        }
     }
 
     /**
@@ -198,11 +204,15 @@ public class Knight extends Piece {
         //TODO
         while (true) {
             try {
-                if (this.stopped.get()) {
-                    return;
+                synchronized (this.stopped) {
+                    if (this.stopped.get()) {
+                        return;
+                    }
                 }
-                while (!(this.running.get())) {
-                    this.running.wait();
+                synchronized (this.running) {
+                    while (!(this.running.get())) {
+                        this.running.wait();
+                    }
                 }
                 Object[] params = this.calculateMoveParametersQueue.takeFirst();
                 Game game = (Game) params[0];
