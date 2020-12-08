@@ -29,6 +29,27 @@ public class JesonMor extends Game {
         }
     }
 
+    private static class GameState {
+        public final Piece[][] board;
+        public final int numMoves;
+        public final HashMap<Player, Integer> playerScores = new HashMap<>();
+        public final Player currentPlayer;
+        public final List<MoveRecord> moveRecords = new ArrayList<>();
+
+        public GameState(Piece[][] board, int numMoves, Player[] players, Player currentPlayer, List<MoveRecord> moveRecords) {
+            this.board = new Piece[board.length][];
+            for (int i = 0; i < board.length; i++) {
+                this.board[i] = Arrays.copyOf(board[i], board[i].length);
+            }
+            this.numMoves = numMoves;
+            for (Player player : players) {
+                playerScores.put(player, player.getScore());
+            }
+            this.currentPlayer = currentPlayer;
+            this.moveRecords.addAll(moveRecords);
+        }
+    }
+
     private Player winner;
 
     public JesonMor() {
@@ -40,6 +61,8 @@ public class JesonMor extends Game {
     }
 
     private List<MoveRecord> moveRecords = new ArrayList<>();
+
+    private final LimitedStack<GameState> saves = new LimitedStack<>(Game.undoLimit);
 
     /**
      * Start the game
@@ -75,6 +98,14 @@ public class JesonMor extends Game {
                 }
             } else {
                 var move = player.nextMove(this, availableMoves);
+
+                if (this.currentPlayer instanceof HumanPlayer) {
+                    // Push a save of the game state onto the saves stack
+                    GameState gameState = new GameState(this.board, this.numMoves
+                            , this.configuration.getPlayers(), this.currentPlayer, this.moveRecords);
+                    this.saves.push(gameState);
+                }
+
                 var movedPiece = this.getPiece(move.getSource());
                 // make move
                 this.movePiece(move);
@@ -258,6 +289,25 @@ public class JesonMor extends Game {
     @Override
     public void undo() throws UndoException {
         //TODO
+        Player[] players = this.configuration.getPlayers();
+        if (players.length != 2
+                || !((players[0] instanceof ComputerPlayer && players[1] instanceof HumanPlayer)
+                        || players[0] instanceof HumanPlayer && players[1] instanceof ComputerPlayer)) {
+            throw new UndoException("Undo is only supported when there is one human player and one computer player");
+        }
+        if (this.saves.size() < 1) {
+            throw new UndoException("No further undo is allowed");
+        }
+        GameState revertGameState = this.saves.pop();
+        this.board = revertGameState.board;
+        this.numMoves = revertGameState.numMoves;
+        for (Player player : this.configuration.getPlayers()) {
+            player.setScore(revertGameState.playerScores.get(player));
+        }
+        this.currentPlayer = revertGameState.currentPlayer;
+        this.moveRecords = revertGameState.moveRecords;
+        this.refreshOutput();
+        System.out.println("Game state reverted");
     }
 
     /**
