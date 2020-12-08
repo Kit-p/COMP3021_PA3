@@ -193,16 +193,46 @@ public class JesonMor extends Game {
      *          the returned available moves should be an array of ALL available moves
      * - for {@link ComputerPlayer}:
      *          before a candidate move is proposed, print "Computer is figuring out next move..."
-     *          return an array containing candidate moves proposed by each piece thread of computer player. 
-     *          Paused/terminated pieces will not propose candidate moves. 
-     *          The number of moves in the array should be the same as the number of non-paused/non-terminated pieces. 
+     *          return an array containing candidate moves proposed by each piece thread of computer player.
+     *          Paused/terminated pieces will not propose candidate moves.
+     *          The number of moves in the array should be the same as the number of non-paused/non-terminated pieces.
      *
      * @param player the player whose available moves to get
      * @return an array of available moves
      */
     public @NotNull Move[] getAvailableMoves(Player player) {
         //TODO
-        return null;
+        if (player instanceof ComputerPlayer) {
+            System.out.println("Computer is figuring out next move...");
+        }
+        HashMap<Place, Piece> mappings = new HashMap<>();
+        int size = this.configuration.getSize();
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                Place currentPlace = new Place(i, j);
+                Piece currentPiece = this.getPiece(currentPlace);
+                if (currentPiece == null || !(currentPiece.getPlayer().equals(player))) {
+                    continue;
+                }
+                mappings.put(currentPlace, currentPiece);
+            }
+        }
+        return mappings.entrySet().parallelStream()
+                .flatMap(mapping -> {
+                    Place currentPlace = mapping.getKey();
+                    Piece currentPiece = mapping.getValue();
+                    if (player instanceof ComputerPlayer) {
+                        Move candidateMove = currentPiece.getCandidateMove(this, currentPlace);
+                        ArrayList<Move> availableMoves = new ArrayList<>();
+                        if (candidateMove != null) {
+                            availableMoves.add(candidateMove);
+                        }
+                        return availableMoves.stream();
+                    } else {
+                        Move[] availableMoves = currentPiece.getAvailableMoves(this, currentPlace);
+                        return Arrays.stream(availableMoves);
+                    }
+                }).collect(Collectors.toList()).toArray(Move[]::new);
     }
 
     /**
