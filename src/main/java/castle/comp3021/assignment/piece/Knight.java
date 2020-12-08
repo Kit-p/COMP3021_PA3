@@ -175,6 +175,7 @@ public class Knight extends Piece {
     @Override
     public void terminate() {
         //TODO
+        this.stopped.set(true);
     }
 
     /**
