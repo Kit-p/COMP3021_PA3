@@ -160,6 +160,10 @@ public class Knight extends Piece {
     @Override
     public void resume() {
         //TODO
+        this.running.set(true);
+        synchronized (this.running) {
+            this.running.notifyAll();
+        }
     }
 
     /**
