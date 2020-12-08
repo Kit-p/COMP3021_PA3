@@ -167,6 +167,7 @@ public class Archer extends Piece {
     @Override
     public void terminate() {
         //TODO
+        this.stopped.set(true);
     }
 
     /**
