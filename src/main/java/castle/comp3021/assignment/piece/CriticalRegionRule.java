@@ -1,9 +1,6 @@
 package castle.comp3021.assignment.piece;
 
-import castle.comp3021.assignment.protocol.Configuration;
-import castle.comp3021.assignment.protocol.Game;
-import castle.comp3021.assignment.protocol.Move;
-import castle.comp3021.assignment.protocol.Place;
+import castle.comp3021.assignment.protocol.*;
 
 public class CriticalRegionRule implements Rule {
 
@@ -34,7 +31,10 @@ public class CriticalRegionRule implements Rule {
      */
     private boolean isInCriticalRegion(Game game, Place place) {
         //TODO
-        return false;
+        int criticalRegionSize = game.getConfiguration().getCriticalRegionSize();
+        Place centralPlace = game.getCentralPlace();
+        return place.y() >= centralPlace.y() - criticalRegionSize / 2
+                && place.y() <= centralPlace.y() + criticalRegionSize / 2;
     }
 
     @Override
