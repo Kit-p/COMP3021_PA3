@@ -74,7 +74,7 @@ public class MakeMoveByStrategy {
                 .collect(Collectors.toList());
         Move greedyMove = moves.stream()
                 .filter(this::isSmartGreedyMove)
-                .min(Comparator.comparingInt(move -> getManhattanDistance(move.getDestination(), game.getCentralPlace())))
+                .min(Comparator.comparingInt(move -> getKnightMinStepsToPlace(move.getDestination(), game.getCentralPlace())))
                 .orElse(null);
         if (greedyMove == null) {
             greedyMove = moves.stream()
@@ -171,11 +171,12 @@ public class MakeMoveByStrategy {
     }
 
     private boolean isSmartGreedyMove(Move move) {
-        if (!isGreedyMove(move)) {
+        if (move == null) {
             return false;
         }
-        int newDistance = getManhattanDistance(move.getDestination(), game.getCentralPlace());
-        return (newDistance % 3 == 0);
+        int oldSteps = getKnightMinStepsToPlace(move.getSource(), game.getCentralPlace());
+        int newSteps = getKnightMinStepsToPlace(move.getDestination(), game.getCentralPlace());
+        return newSteps < oldSteps;
     }
 
     private boolean isCapturingMove(Move move) {
@@ -212,5 +213,71 @@ public class MakeMoveByStrategy {
 
     private boolean isEnemyKnight(Piece piece) {
         return (piece instanceof Knight && !(piece.getPlayer().equals(game.currentPlayer)));
+    }
+
+    private int getKnightMinStepsToPlace(Place source, Place destination) {
+        if (source == null || destination == null) {
+            return Integer.MAX_VALUE;
+        }
+        int size = game.getConfiguration().getSize();
+        boolean[][] visited = new boolean[size + 1][size + 1];
+        for (int i = 0; i <= size; i++) {
+            for (int j = 0; j <= size; j++) {
+                visited[i][j] = false;
+            }
+        }
+        visited[source.x()][source.y()] = true;
+        Map<Place, Integer> queue = new LinkedHashMap<>();
+        queue.put(source, 0);
+        Map.Entry<Place, Integer> currentEntry;
+        while (!queue.isEmpty()) {
+            currentEntry = queue.entrySet().iterator().next();
+            queue.remove(currentEntry.getKey());
+            if (currentEntry.getKey().equals(destination)) {
+                return currentEntry.getValue();
+            }
+            Move[] availableMoves = getKnightAvailableMoves(currentEntry.getKey());
+            for (Move move : availableMoves) {
+                Place nextCell = move.getDestination();
+                if (!visited[nextCell.x()][nextCell.y()]) {
+                    visited[nextCell.x()][nextCell.y()] = true;
+                    queue.put(nextCell, currentEntry.getValue() + 1);
+                }
+            }
+        }
+        return Integer.MAX_VALUE;
+    }
+
+    private Move[] getKnightAvailableMoves(Place source) {
+        var moves = new ArrayList<Move>();
+        var steps = new int[]{1, -1, 2, -2};
+        for (var stepX :
+                steps) {
+            for (var stepY :
+                    steps) {
+                var destination = new Place(source.x() + stepX, source.y() + stepY);
+                if (Math.abs(destination.x() - source.x()) + Math.abs(destination.y() - source.y()) == 3) {
+                    moves.add(new Move(source, destination));
+                }
+            }
+        }
+        return moves.stream()
+                .filter(this::validateKnightMove)
+                .toArray(Move[]::new);
+    }
+
+    private boolean validateKnightMove(Move move) {
+        var rules = new Rule[]{
+                new OutOfBoundaryRule(),
+                new OccupiedRule(),
+                new NilMoveRule()
+        };
+        for (var rule :
+                rules) {
+            if (!rule.validate(game, move)) {
+                return false;
+            }
+        }
+        return true;
     }
 }
