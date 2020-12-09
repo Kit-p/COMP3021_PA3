@@ -334,6 +334,7 @@ public class JesonMor extends Game {
         for (MoveRecord moveRecord : this.moveRecords) {
             System.out.println(moveRecord.toString());
         }
+        System.out.println();
     }
 
     @Override
