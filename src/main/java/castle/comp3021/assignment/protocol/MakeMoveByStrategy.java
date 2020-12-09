@@ -269,8 +269,9 @@ public class MakeMoveByStrategy {
     private boolean validateKnightMove(Move move) {
         var rules = new Rule[]{
                 new OutOfBoundaryRule(),
-                new OccupiedRule(),
-                new NilMoveRule()
+                new NilMoveRule(),
+                new KnightMoveRule(),
+                new KnightBlockRule()
         };
         for (var rule :
                 rules) {
