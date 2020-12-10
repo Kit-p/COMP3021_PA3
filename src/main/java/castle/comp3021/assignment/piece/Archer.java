@@ -208,12 +208,12 @@ public class Archer extends Piece {
                 Game game = (Game) params[0];
                 Place place = (Place) params[1];
                 Move[] availableMoves = this.getAvailableMoves(game, place);
-                if (availableMoves.length <= 0) {
-                    this.candidateMoveQueue.put(new InvalidMove());
-                } else {
-                    MakeMoveByBehavior makeMoveByBehavior = new MakeMoveByBehavior(game, availableMoves, this.behavior);
-                    this.candidateMoveQueue.put(makeMoveByBehavior.getNextMove());
+                MakeMoveByBehavior makeMoveByBehavior = new MakeMoveByBehavior(game, availableMoves, this.behavior);
+                Move nextMove = makeMoveByBehavior.getNextMove();
+                if (nextMove == null) {
+                    nextMove = new InvalidMove();
                 }
+                this.candidateMoveQueue.put(nextMove);
             } catch (InterruptedException ignored) {
                 // piece is paused or terminated
             }
